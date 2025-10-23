@@ -1,0 +1,97 @@
+<!doctype html>
+</div>
+<div id="modal-body"></div>
+</div>
+</div>
+
+
+<script>
+// ---- DATA: edit section below to change biodata ----
+const profileData = [
+{ key: 'Nama', value: 'Nama Kamu', clickable:true },
+{ key: 'Sekolah', value: 'SMA/SMK/Universitas Kamu', clickable:true },
+{ key: 'Keterampilan', value: 'Mikrotik, HTML, CSS, JavaScript', clickable:true },
+{ key: 'Email', value: 'email@example.com', clickable:true },
+{ key: 'Telepon', value: '+62 8xx-xxxx-xxxx', clickable:true }
+];
+
+
+const projects = [
+{ title: 'Website Portofolio', desc: 'Situs portofolio sederhana', link: '#' },
+{ title: 'Konfigurasi Mikrotik', desc: 'Dokumentasi konfigurasi lab', link: '#' }
+];
+// ---- END DATA ----
+
+
+// render profile list
+const list = document.getElementById('profile-list');
+profileData.forEach((item, idx) =>{
+const li = document.createElement('li');
+li.tabIndex = 0;
+li.dataset.idx = idx;
+li.innerHTML = `<span class="key">${item.key}</span><div style="font-size:13px;color:var(--muted);margin-top:6px">${truncate(item.value,36)}</div>`;
+li.addEventListener('click', ()=> showDetail(idx));
+li.addEventListener('keypress', (e)=>{ if(e.key==='Enter') showDetail(idx); });
+list.appendChild(li);
+});
+
+
+// render projects
+const pList = document.getElementById('projects-list');
+projects.forEach(p=>{
+const li = document.createElement('li');
+li.style.padding = '8px 0';
+li.innerHTML = `<strong>${p.title}</strong> — <span style="color:var(--muted)">${p.desc}</span> ${p.link?`<a href="${p.link}" target="_blank" style="margin-left:8px">lihat</a>`:''}`;
+pList.appendChild(li);
+});
+
+
+// small helpers
+function truncate(s,n){ return s.length>n? s.slice(0,n-1)+'…': s }
+
+
+function showDetail(idx){
+const item = profileData[idx];
+const title = item.key;
+const body = `<p style="margin:0 0 8px"><strong>${item.value}</strong></p><p style=\"color:var(--muted)\">Klik tombol di bawah untuk menyalin ke clipboard.</p><div style=\"margin-top:10px;display:flex;gap:8px\"><button onclick=\"copyText(${idx})\" class=\"btn\">Salin</button><button class=\"btn\" onclick=\"closeModal()\">Tutup</button></div>`;
+openModal(title, body);
+}
+
+
+function openModal(title, body){
+document.getElementById('modal-title').textContent = title;
+document.getElementById('modal-body').innerHTML = body;
+const m = document.getElementById('modal');
+m.classList.add('show'); m.setAttribute('aria-hidden','false');
+}
+function closeModal(){ const m=document.getElementById('modal'); m.classList.remove('show'); m.setAttribute('aria-hidden','true'); }
+
+
+function copyText(idx){
+const val = profileData[idx].value;
+navigator.clipboard?.writeText(val).then(()=>{
+alert('Tersalin: '+val);
+}).catch(()=>{ prompt('Salin manual:', val); });
+}
+
+
+function onNavClick(e,mode){ e.preventDefault(); if(mode==='resume'){
+openModal('Download CV','<p>Tambahkan file CV Anda ke repositori dan ganti tautan tombol ini.</p>');
+} else if(mode==='contact'){
+openModal('Kontak','<p>Email: <strong>'+profileData.find(p=>p.key==='Email')?.value+'</strong></p><p>Telepon: <strong>'+profileData.find(p=>p.key==='Telepon')?.value+'</strong></p>');
+}}
+
+
+// set header data from profile if present
+(function initHeader(){
+const nameItem = profileData.find(p=>p.key==='Nama');
+if(nameItem){ document.getElementById('site-name').textContent = nameItem.value; document.getElementById('avatar').textContent = initials(nameItem.value); document.title = nameItem.value + ' — Portfolio'; }
+const aboutText = document.getElementById('about-text');
+aboutText.textContent = nameItem? `Halo, saya ${nameItem.value}. ${aboutText.textContent}` : aboutText.textContent;
+})();
+
+
+function initials(name){ return name.split(' ').map(s=>s[0]||'').slice(0,2).join('').toUpperCase(); }
+</script>
+</body>
+</html>
